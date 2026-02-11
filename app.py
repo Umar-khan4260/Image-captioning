@@ -194,7 +194,7 @@ def load_model_and_vocab():
         try:
             import gdown
             # TODO: Replace with your Google Drive file ID
-            file_id = '19b5Cg_dAC24_B1V03KcEj5myBEr7QUYj'
+            file_id = '1LJPAF_zo6AN_xnX8uCgidNRLEbuaQa4B'
             url = f'https://drive.google.com/uc?id={file_id}'
             gdown.download(url, model_file, quiet=False)
             st.success("✅ Model downloaded successfully!")
