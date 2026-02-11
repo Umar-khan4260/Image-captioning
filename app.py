@@ -10,6 +10,7 @@ from torchvision import models, transforms
 from PIL import Image
 import pickle
 import numpy as np
+import os
 
 # Page configuration
 st.set_page_config(
@@ -185,9 +186,31 @@ def load_model_and_vocab():
     """Load the trained model and vocabulary"""
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
+    model_file = 'complete_model_package.pkl'
+    
+    # Download model if not present
+    if not os.path.exists(model_file):
+        st.info("📥 Downloading model (one-time setup, ~2 minutes)...")
+        try:
+            import gdown
+            # TODO: Replace with your Google Drive file ID
+            file_id = '1LJPAF_zo6AN_xnX8uCgidNRLEbuaQa4B'
+            url = f'https://drive.google.com/uc?id={file_id}'
+            gdown.download(url, model_file, quiet=False)
+            st.success("✅ Model downloaded successfully!")
+        except Exception as e:
+            st.error(f"Failed to download model: {str(e)}")
+            st.info("Please upload the model file manually or check the file ID.")
+            return None, None, device
+    
     # Load model package
-    with open('complete_model_package.pkl', 'rb') as f:
-        model_package = pickle.load(f)
+    try:
+        with open(model_file, 'rb') as f:
+            model_package = pickle.load(f)
+    except Exception as e:
+        st.error(f"Error loading model file: {str(e)}")
+        st.info("The model file may be corrupted. Please re-download from Kaggle.")
+        return None, None, device
     
     vocab = model_package['vocab']
     config = model_package['config']
@@ -307,6 +330,12 @@ def main():
                     try:
                         # Load model and resources
                         model, vocab, model_device = load_model_and_vocab()
+                        
+                        # Check if model loaded successfully
+                        if model is None or vocab is None:
+                            st.error("❌ Model not loaded. Please check the error messages above.")
+                            st.stop()
+                        
                         resnet, resnet_device = load_feature_extractor()
                         
                         # Preprocess image
@@ -336,6 +365,8 @@ def main():
                     except Exception as e:
                         st.error(f"Error generating caption: {str(e)}")
                         st.error("Please make sure all model files are present.")
+                        import traceback
+                        st.code(traceback.format_exc())
     
     else:
         # Placeholder when no image is uploaded
