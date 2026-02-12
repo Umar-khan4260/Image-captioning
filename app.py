@@ -194,6 +194,7 @@ def load_model_and_vocab():
         try:
             import gdown
             # TODO: Replace with your Google Drive file ID
+
             file_id = '1LJPAF_zo6AN_xnX8uCgidNRLEbuaQa4B'
             url = f'https://drive.google.com/uc?id={file_id}'
             gdown.download(url, model_file, quiet=False)
@@ -203,10 +204,10 @@ def load_model_and_vocab():
             st.info("Please upload the model file manually or check the file ID.")
             return None, None, device
     
-    # Load model package
+    # Load model package with CPU mapping (important for models saved on GPU)
     try:
-        with open(model_file, 'rb') as f:
-            model_package = pickle.load(f)
+        # Use torch.load with map_location to handle CUDA → CPU conversion
+        model_package = torch.load(model_file, map_location='cpu')
     except Exception as e:
         st.error(f"Error loading model file: {str(e)}")
         st.info("The model file may be corrupted. Please re-download from Kaggle.")
