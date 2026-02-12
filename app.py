@@ -207,7 +207,8 @@ def load_model_and_vocab():
     # Load model package with CPU mapping (important for models saved on GPU)
     try:
         # Use torch.load with map_location to handle CUDA → CPU conversion
-        model_package = torch.load(model_file, map_location='cpu')
+        # weights_only=False is needed because we're loading a complete model package (not just weights)
+        model_package = torch.load(model_file, map_location='cpu', weights_only=False)
     except Exception as e:
         st.error(f"Error loading model file: {str(e)}")
         st.info("The model file may be corrupted. Please re-download from Kaggle.")
